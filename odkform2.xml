@@ -1,0 +1,292 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+xmlns:h="http://www.w3.org/1999/xhtml"
+xmlns:ev="http://www.w3.org/2001/xml-events"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:jr="http://openrosa.org/javarosa">
+
+
+<!-- title will be shown to user -->
+<h:head>
+  <h:title>Killer Whale Collection</h:title>
+  <model>
+   
+
+  <!-- instance, where data are going to be stored -->
+  <!-- can name it anything.... <data id=... or <junk id=..-->
+  <instance>
+    <data id="data" >
+      <start/>
+      <end/>
+      <email/>
+      <dateTime/>
+      <location/>
+      <seastate/>
+      <weather/>
+      <srkw/>
+      <pod/>
+      <cohesion/>
+      <srdir/>
+      <orientation/>
+      <resspeed/>
+      <my_image/>
+    </data>
+  </instance>
+ 
+   <!--geolocation widget with button to get location -->
+
+
+  <!-- bindings, constraints -->
+  <!-- bindings not identified are default to string -->
+
+  <!-- cascading skip logic. If SRKW present, ask what pod -->
+ <!-- cascading skip logic. If SRKW present, ask what pod -->
+
+  <bind nodeset="/data/start" type="dateTime" jr:preload="timestamp" jr:preloadParams="start" />
+  <bind nodeset="/data/end" type="dateTime" jr:preload="timestamp" jr:preloadParams="end" />
+  <bind nodeset="/data/email" type="string" jr:preload="property" jr:preloadParams="uri:email"/>
+  <bind nodeset="/data/dateTime" type="dateTime" />
+  <bind nodeset="/data/location" type="geopoint"/>
+  <bind nodeset="/data/seastate" type="select1" />
+  <bind nodeset="/data/weather" type="select1" />
+  <bind nodeset="/data/srkw" type="select1" />
+  <bind nodeset="/data/pod" type="select" relevant="/data/srkw = 'yes'" />
+  <bind nodeset="/data/cohesion" type="select1" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/srdir" type="select" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/orientation" type="select1" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/resspeed" type="select1" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/my_image"  type="binary"/>
+   
+  <!--geolocation node-->
+ <!--  <bind nodeset="/widgets/my_geopoint" type="geopoint"/> -->
+  </model>
+</h:head>
+
+<!-- body, how the prompts are displayed to the user-->
+<h:body>      
+  <!--geolocation widget from ODK form design examples-->
+  <!--automatically stops when accuracy is 5m or less unless specified under accuracy threshold-->
+ 
+ <!--<input appearance="quick" ref="name">
+  <label>This application automates the data collection process for SoundWatch. </label>
+    <item>
+      <label>Please enter your name</label>
+    </item> 
+</input>
+-->
+<input ref="/data/dateTime">
+  <label>Verify that today's date and time are correct.</label>
+  <hint>Swipe right when the date and time are confirmed</hint>
+</input>
+<input ref="location">
+  <label>Select Record Location to obtain coordinates</label>
+  <hint>Once accuracy is 5 meters or less, location will be recorded. You can Replace the location</hint>
+</input>
+<select1 appearance="quick" ref="seastate">
+  <label>What is the sea state?</label>
+  <hint>On a Beaufort scale</hint>
+
+  <item>
+    <label>0, Sea like a mirror</label>
+    <value>0</value>
+  </item>
+  <item>
+    <label>1, Ripples</label>
+    <value>1</value>
+  </item>
+  <item>
+    <label>2, Small Wavelets all over. No Whitecaps</label>
+    <value>2</value>
+  </item>
+  <item>
+    <label>3, Large wavelets. Few white caps here and there</label>
+    <value>3</value>
+  </item>
+  <item>
+    <label>4, Small waves. Fairly frequent white caps</label>
+    <value>4</value>
+  </item>
+  <item>
+    <label>5, Moderate waves</label>
+    <value>5</value>
+  </item>
+  <item>
+    <label>6, Large waves with white foam crests. Spray probable</label>
+    <value>6</value>
+  </item>
+</select1>
+<select1 appearance="quick" ref="weather">
+  <label>What is the weather?</label>
+  <hint>Cloudy? Sunny? Partly cloudy?</hint>
+
+  <item>
+    <label>Sunny</label>
+    <value>sunny</value>
+  </item>
+  <item>
+    <label>Partly Sunny</label>
+    <value>partsun</value>
+  </item>
+  <item>
+    <label>Cloudy</label>
+    <value>cloudy</value>
+  </item>
+  <item>
+    <label>Partly Cloudy</label>
+    <value>partcloud</value>
+  </item>
+  <item>
+    <label>Raining</label>
+    <value>raining</value>
+  </item>
+  <item>
+    <label>Foggy</label>
+    <value>foggy</value>
+  </item>
+  <item>
+    <label>Windy</label>
+    <value>windy</value>
+  </item>
+  <item>
+    <label>Snowing</label>
+    <value>snowing</value>
+  </item>
+  <item>
+    <label>Hailing</label>
+    <value>hail</value>
+  </item>
+</select1>
+<select1 appearance="quick" ref="/srkw">
+  <label>Are there SRKW autoadvance?</label>
+  <item>
+    <label>yes</label>
+    <value>yes</value>
+  </item>
+</select1>
+<select ref="pod">
+  <label>What pods?</label>
+  <hint>Check all that are present</hint>
+  <item>
+    <label>J pod</label>
+    <value>j</value>
+  </item>
+  <item>
+    <label>K pod</label>
+    <value>k</value>
+  </item>
+  <item>
+    <label>L pod</label>
+    <value>l</value>
+  </item>
+</select>
+<select1 appearance="quick" ref="cohesion">
+  <label>What is the cohesion of the whales?</label>
+  <hint>What is their spacing?</hint>
+  <item>
+      <label>Contact</label>
+        <hint>Whales touching</hint>
+      <value>contact</value>
+  </item>
+  <item>
+      <label>Tight</label>
+        <hint>Whales close together</hint>
+      <value>tight</value>
+  </item>
+  <item>
+      <label>Loose</label>
+        <hint>Whales in a spread group</hint>
+      <value>loose</value>
+  </item>
+  <item>
+      <label>Spread</label>
+        <hint>Whales spread out</hint>
+      <value>spread</value>
+  </item>
+  <item>
+      <label>Spread in Groups</label>
+        <hint>Whales spread out in groups</hint>
+      <value>spreadgroup</value>
+  </item>
+</select1>
+<select ref="srdir">
+  <label>What direction are they going?</label>
+
+ <item>
+      <label>North</label>
+      <value>north</value>
+ </item>
+ <item>
+      <label>Northeast</label>
+      <value>northeast</value>
+  </item>
+  <item>
+      <label>East</label>
+      <value>east</value>
+  </item>
+  <item>
+      <label>Southeast</label>
+      <value>southeast</value>
+  </item>
+  <item>
+      <label>South</label>
+      <value>South</value>
+  </item>
+  <item>
+      <label>Southwest</label>
+      <value>southwest</value>
+  </item>
+  <item>
+      <label>West</label>
+      <value>west</value>
+  </item>
+  <item>
+      <label>Northwest</label>
+      <value>northwest</value>
+  </item>
+</select>
+<select1 appearance="quick" ref="orientation">
+  <label>What is the orientation of the Southern Residents?</label>
+  <item>
+    <label>Flank</label>
+    <value>flank</value>
+  </item>
+  <item>
+    <label>Linear</label>
+    <value>linear</value>
+  </item>
+  <item>
+    <label>Non-Linear</label>
+    <value>nonlinear</value>
+  </item>
+</select1>
+<select1 appearance="quick" ref="resspeed">
+  <label>How fast are they going?</label>
+  <item>
+    <label>Stationary</label>
+    <value>stationary</value>
+  </item>
+  <item>
+    <label>Slow</label>
+    <value>slow</value>
+  </item>
+  <item>
+    <label>Medium</label>
+    <value>medium</value>
+  </item>
+  <item>
+    <label>Fast</label>
+    <value>fast</value>
+  </item>
+  <item>
+    <label>Porpoise</label>
+      <hint>spray off the fin, swimming fast</hint>
+    <value>porpoise</value>
+  </item>
+</select1>
+<upload ref="my_image" mediatype="image/*">
+  <hint>This will launch the camera to take a picture</hint>
+  <label>Take a picture!</label>
+</upload>
+
+</h:body>
+
+</h:html>

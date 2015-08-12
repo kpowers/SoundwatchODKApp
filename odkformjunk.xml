@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Basic</h:title>
+    <model>
+      <instance>
+        <!-- submitted data and defaults go here -->
+        <data id="data">
+          <StringData/>
+            <start/>
+            <end/>
+            <dateTime/>
+            <location/>    
+            <seastate/>
+            <weather/>
+            
+          </data>
+      </instance> 
+      <!-- add properties to the questions, like data types, skip logic, and constraints -->
+      <bind nodeset="/data/StringData" type="string" />
+      <bind nodeset="/data/start" type="dateTime" jr:preload="timestamp" jr:preloadParams="start" />
+      <bind nodeset="/data/end" type="dateTime" jr:preload="timestamp" jr:preloadParams="end" />
+      <bind nodeset="/data/dateTime" type="dateTime" />
+      <bind nodeset="/data/location" type="geopoint"/>
+      <bind nodeset="/data/seastate" type="string" />
+      <bind nodeset="/data/weather" type="string" />
+    </model>
+  </h:head>
+  <h:body>   
+    <!-- define the questions that the user will fill out -->
+    <input ref="StringData">
+      <label>please enter a string</label>
+    </input>
+    <input ref="/data/dateTime">
+  <label>Verify that today's date and time are correct.</label>
+  <hint>Swipe right when the date and time are confirmed</hint>
+</input>
+<input ref="location">
+  <label>Select Record Location to obtain coordinates</label>
+  <hint>Once accuracy is 5 meters or less, location will be recorded. You can Replace the location</hint>
+</input>
+
+<select1 appearance="quick" ref="seastate">
+  <label>What is the sea state?</label>
+  <hint>On a Beaufort scale</hint>
+  <item>
+    <label>0, Sea like a mirror</label>
+    <value>0</value>
+  </item>
+  <item>
+    <label>1, Ripples</label>
+    <value>1</value>
+  </item>
+  <item>
+    <label>2, Small Wavelets all over. No Whitecaps</label>
+    <value>2</value>
+  </item>
+  <item>
+    <label>3, Large wavelets. Few white caps here and there</label>
+    <value>3</value>
+  </item>
+  <item>
+    <label>4, Small waves. Fairly frequent white caps</label>
+    <value>4</value>
+  </item>
+  <item>
+    <label>5, Moderate waves</label>
+    <value>5</value>
+  </item>
+  <item>
+    <label>6, Large waves with white foam crests. Spray probable</label>
+    <value>6</value>
+  </item>
+</select1>
+
+<select1 appearance="quick" ref="weather">
+  <label>What is the weather?</label>
+  <hint>Cloudy? Sunny? Partly cloudy?</hint>
+
+  <item>
+    <label>Sunny</label>
+    <value>sunny</value>
+  </item>
+  <item>
+    <label>Partly Sunny</label>
+    <value>partsun</value>
+  </item>
+  <item>
+    <label>Cloudy</label>
+    <value>cloudy</value>
+  </item>
+  <item>
+    <label>Partly Cloudy</label>
+    <value>partcloud</value>
+  </item>
+  <item>
+    <label>Raining</label>
+    <value>raining</value>
+  </item>
+  <item>
+    <label>Foggy</label>
+    <value>foggy</value>
+  </item>
+  <item>
+    <label>Windy</label>
+    <value>windy</value>
+  </item>
+  <item>
+    <label>Snowing</label>
+    <value>snowing</value>
+  </item>
+  <item>
+    <label>Hailing</label>
+    <value>hail</value>
+  </item>
+</select1>
+
+  </h:body>
+</h:html>
