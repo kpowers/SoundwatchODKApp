@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <h:html xmlns="http://www.w3.org/2002/xforms"
 xmlns:h="http://www.w3.org/1999/xhtml"
 xmlns:ev="http://www.w3.org/2001/xml-events"
@@ -14,20 +15,25 @@ xmlns:jr="http://openrosa.org/javarosa">
   <!-- instance, where data are going to be stored -->
   <!-- can name it anything.... <data id=... or <junk id=..-->
   <instance>
-    <data id="data" >
+    <data id="data1" >
       <start/>
       <end/>
-      <email/>
-      <dateTime/>
-      <location/>
       <seastate/>
       <weather/>
+      <ecototal/>
+      <species/>
       <srkw/>
       <pod/>
       <cohesion/>
       <srdir/>
       <orientation/>
       <resspeed/>
+      <comment/>
+      <mapquestion/>
+      <location/>
+      <maplocation/>
+      <dateTime/>
+      <email/>
       <my_image/>
     </data>
   </instance>
@@ -37,25 +43,29 @@ xmlns:jr="http://openrosa.org/javarosa">
 
   <!-- bindings, constraints -->
   <!-- bindings not identified are default to string -->
+<!--   <bind nodeset="/data/stamp" type="dateTime" jr:preload="timestamp" jr:preloadParams="start"/>
+  <bind nodeset="/data/end" type="dateTime" jr:preload="timestamp" jr:preloadParams="end"/> -->
+  <!-- <bind nodeset="/data/meta/instanceID" type="string" 
+           readonly="true()" calculate="concat('uuid:',uuid())" /> -->
 
   <!-- cascading skip logic. If SRKW present, ask what pod -->
- <!-- cascading skip logic. If SRKW present, ask what pod -->
-
+  
   <bind nodeset="/data/start" type="dateTime" jr:preload="timestamp" jr:preloadParams="start" />
   <bind nodeset="/data/end" type="dateTime" jr:preload="timestamp" jr:preloadParams="end" />
   <bind nodeset="/data/email" type="string" jr:preload="property" jr:preloadParams="uri:email"/>
   <bind nodeset="/data/dateTime" type="dateTime" />
-  <bind nodeset="/data/location" type="geopoint"/>
-  <bind nodeset="/data/seastate" type="select1" />
-  <bind nodeset="/data/weather" type="select1" />
-  <bind nodeset="/data/srkw" type="select1" />
-  <bind nodeset="/data/pod" type="select" relevant="/data/srkw = 'yes'" />
-  <bind nodeset="/data/cohesion" type="select1" relevant="/data/srkw = 'yes' " />
-  <bind nodeset="/data/srdir" type="select" relevant="/data/srkw = 'yes' " />
-  <bind nodeset="/data/orientation" type="select1" relevant="/data/srkw = 'yes' " />
-  <bind nodeset="/data/resspeed" type="select1" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/pod" type="string" relevant="/data/srkw = 'yes'" />
+ 
+  <bind nodeset="/data/cohesion" type="string" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/srdir" type="select1" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/resspeed" type="string" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/orientation" type="string" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/mapquestion" type="select1"/>
+  <bind nodeset="/data/location" type="geopoint" relevant="/data/mapquestion= 'No' " />
+  <bind nodeset="/data/maplocation" type="geopoint" relevant="/data/mapquestion= 'Yes' "/>
   <bind nodeset="/data/my_image"  type="binary"/>
-   
+
+ 
   <!--geolocation node-->
  <!--  <bind nodeset="/widgets/my_geopoint" type="geopoint"/> -->
   </model>
@@ -66,20 +76,30 @@ xmlns:jr="http://openrosa.org/javarosa">
   <!--geolocation widget from ODK form design examples-->
   <!--automatically stops when accuracy is 5m or less unless specified under accuracy threshold-->
  
- <!--<input appearance="quick" ref="name">
-  <label>This application automates the data collection process for SoundWatch. </label>
-    <item>
-      <label>Please enter your name</label>
-    </item> 
-</input>
--->
-<input ref="/data/dateTime">
+ 
+<input ref="/data/dateTime" appearance="no-calendar">
   <label>Verify that today's date and time are correct.</label>
   <hint>Swipe right when the date and time are confirmed</hint>
 </input>
+<select1 ref="/data/mapquestion">
+  <label>Do you want to set location with a map and GPS?</label>
+  <hint>This feature uses data</hint>
+  <item>
+    <label>Yes, open map</label>
+    <value>Yes</value>
+  </item>
+  <item>
+    <label>No, use only GPS</label>
+    <value>No</value>
+  </item>
+</select1>
 <input ref="location">
   <label>Select Record Location to obtain coordinates</label>
   <hint>Once accuracy is 5 meters or less, location will be recorded. You can Replace the location</hint>
+</input>
+<input ref="/data/maplocation" appearance="placement-map">
+  <label>Indicate your current location on the map.</label>
+  <hint>Note: this uses Data and requires a connection</hint>
 </input>
 <select1 appearance="quick" ref="seastate">
   <label>What is the sea state?</label>
@@ -114,6 +134,7 @@ xmlns:jr="http://openrosa.org/javarosa">
     <value>6</value>
   </item>
 </select1>
+
 <select1 appearance="quick" ref="weather">
   <label>What is the weather?</label>
   <hint>Cloudy? Sunny? Partly cloudy?</hint>
@@ -155,13 +176,138 @@ xmlns:jr="http://openrosa.org/javarosa">
     <value>hail</value>
   </item>
 </select1>
-<select1 appearance="quick" ref="/srkw">
-  <label>Are there SRKW autoadvance?</label>
+
+<select1 appearance="minimal" ref="ecototal">
+  <label>Total number of ecotourism vessels</label>
   <item>
-    <label>yes</label>
+      <label>0</label>
+      <value>0</value>
+    </item>
+    <item>
+      <label>1</label>
+      <value>1</value>
+    </item>
+    <item>
+      <label>2</label>
+      <value>2</value>
+    </item>
+    <item>
+      <label>3</label>
+      <value>3</value>
+    </item>
+    <item>
+      <label>4</label>
+      <value>4</value>
+    </item>
+    <item>
+      <label>5</label>
+      <value>5</value>
+    </item>
+    <item>
+      <label>6</label>
+      <value>6</value>
+    </item>
+    <item>
+      <label>7</label>
+      <value>7</value>
+    </item>
+    <item>
+      <label>8</label>
+      <value>8</value>
+    </item>
+    <item>
+      <label>9</label>
+      <value>9</value>
+    </item>
+    <item>
+      <label>10</label>
+      <value>10</value>
+    </item>
+    <item>
+      <label>11</label>
+      <value>11</value>
+    </item>
+    <item>
+      <label>12</label>
+      <value>12</value>
+    </item>
+    <item>
+      <label>13</label>
+      <value>13</value>
+    </item>
+    <item>
+      <label>14</label>
+      <value>14</value>
+    </item>
+    <item>
+      <label>15</label>
+      <value>15</value>
+    </item>
+    <item>
+      <label>16</label>
+      <value>16</value>
+    </item>
+    <item>
+      <label>17</label>
+      <value>17</value>
+    </item>
+    <item>
+      <label>18</label>
+      <value>18</value>
+    </item>
+    <item>
+      <label>19</label>
+      <value>19</value>
+    </item>
+    <item>
+      <label>20</label>
+      <value>20</value>
+    </item>
+</select1>
+<select1 appearance="quick" ref="srkw">
+  <label>Are there Southern Residents Present?</label>
+  <item>
+    <label>Yes</label>
     <value>yes</value>
   </item>
+  <item>
+    <label>No</label>
+    <value>no</value>
+  </item>
 </select1>
+<select ref="species">
+  <label>What other marine mammal species are present?</label>
+  <hint>Select all that are present</hint>
+    <item>
+      <label>Transient Killer Whale</label>
+      <value>transient</value>
+    </item>
+    <item>
+      <label>Humpback Whale</label>
+      <value>humpback</value>
+    </item>
+    <item>
+      <label>Minke Whale</label>
+      <value>minke</value>
+    </item>
+    <item>
+      <label>Harbor Porpoise</label>
+      <value>harbporp</value>
+    </item>
+    <item>
+      <label>Dahl's Porpoise</label>
+      <value>dahls</value>
+    </item>
+    <item>
+      <label>Stellar Sea Lion</label>
+      <value>stellarlion</value>
+    </item>
+    <item>
+      <label>Harbor Seal</label>
+      <value>harseal</value>
+    </item>
+</select>
+
 <select ref="pod">
   <label>What pods?</label>
   <hint>Check all that are present</hint>
@@ -178,36 +324,38 @@ xmlns:jr="http://openrosa.org/javarosa">
     <value>l</value>
   </item>
 </select>
+
 <select1 appearance="quick" ref="cohesion">
   <label>What is the cohesion of the whales?</label>
   <hint>What is their spacing?</hint>
   <item>
       <label>Contact</label>
-        <hint>Whales touching</hint>
+        <hint>Whales are touching</hint>
       <value>contact</value>
   </item>
   <item>
       <label>Tight</label>
-        <hint>Whales close together</hint>
+        <hint>Whales are close together</hint>
       <value>tight</value>
   </item>
   <item>
       <label>Loose</label>
-        <hint>Whales in a spread group</hint>
+        <hint>Whales are in a spread group</hint>
       <value>loose</value>
   </item>
   <item>
       <label>Spread</label>
-        <hint>Whales spread out</hint>
+        <hint>Whales are spread out</hint>
       <value>spread</value>
   </item>
   <item>
       <label>Spread in Groups</label>
-        <hint>Whales spread out in groups</hint>
+        <hint>Whales are spread out in groups</hint>
       <value>spreadgroup</value>
   </item>
 </select1>
-<select ref="srdir">
+
+<select1 ref="srdir">
   <label>What direction are they going?</label>
 
  <item>
@@ -242,7 +390,8 @@ xmlns:jr="http://openrosa.org/javarosa">
       <label>Northwest</label>
       <value>northwest</value>
   </item>
-</select>
+</select1>
+
 <select1 appearance="quick" ref="orientation">
   <label>What is the orientation of the Southern Residents?</label>
   <item>
@@ -258,6 +407,7 @@ xmlns:jr="http://openrosa.org/javarosa">
     <value>nonlinear</value>
   </item>
 </select1>
+
 <select1 appearance="quick" ref="resspeed">
   <label>How fast are they going?</label>
   <item>
@@ -286,7 +436,9 @@ xmlns:jr="http://openrosa.org/javarosa">
   <hint>This will launch the camera to take a picture</hint>
   <label>Take a picture!</label>
 </upload>
+<input ref="comment">
+  <label>Any other comments or behaviors?</label>
+</input>
 
 </h:body>
-
 </h:html>
