@@ -16,58 +16,82 @@ xmlns:jr="http://openrosa.org/javarosa">
   <!-- can name it anything.... <data id=... or <junk id=..-->
   <instance>
     <data id="data1" >
+
       <start/>
       <end/>
-      <seastate/>
-      <weather/>
-      <ecototal/>
-      <species/>
-      <srkw/>
-      <pod/>
-      <cohesion/>
-      <srdir/>
-      <orientation/>
-      <resspeed/>
-      <comment/>
+      <email/>
+      <name/>
+      <AB/>
+      <dateTime/>
       <mapquestion/>
       <location/>
       <maplocation/>
-      <dateTime/>
-      <email/>
+      <seastate/>
+      <weather/>
+      <EU/>
+      <EC/>
+      <ecototal/>
+      <EcoConfirmation/>
+      <kayaktotal/>
+      <PK/>
+      <RP/>
+      <RPID/>
+      <RPIDother/>
+      <species/>
+      <srkw/>
+      <pod/>
+      <identity/>
+      <cohesion/>
+      <srdir/>
+      <orientation/>
+      <resspeed/>       
       <my_image/>
+      <comment/> 
     </data>
   </instance>
  
-   <!--geolocation widget with button to get location -->
-
 
   <!-- bindings, constraints -->
   <!-- bindings not identified are default to string -->
-<!--   <bind nodeset="/data/stamp" type="dateTime" jr:preload="timestamp" jr:preloadParams="start"/>
-  <bind nodeset="/data/end" type="dateTime" jr:preload="timestamp" jr:preloadParams="end"/> -->
-  <!-- <bind nodeset="/data/meta/instanceID" type="string" 
-           readonly="true()" calculate="concat('uuid:',uuid())" /> -->
-
   <!-- cascading skip logic. If SRKW present, ask what pod -->
   
   <bind nodeset="/data/start" type="dateTime" jr:preload="timestamp" jr:preloadParams="start" />
   <bind nodeset="/data/end" type="dateTime" jr:preload="timestamp" jr:preloadParams="end" />
   <bind nodeset="/data/email" type="string" jr:preload="property" jr:preloadParams="uri:email"/>
+  <bind nodeset="/data/name" type="string" />
+  <bind nodeset="/data/AB" type="select1"/>
   <bind nodeset="/data/dateTime" type="dateTime" />
-  <bind nodeset="/data/pod" type="string" relevant="/data/srkw = 'yes'" />
- 
-  <bind nodeset="/data/cohesion" type="string" relevant="/data/srkw = 'yes' " />
-  <bind nodeset="/data/srdir" type="select1" relevant="/data/srkw = 'yes' " />
-  <bind nodeset="/data/resspeed" type="string" relevant="/data/srkw = 'yes' " />
-  <bind nodeset="/data/orientation" type="string" relevant="/data/srkw = 'yes' " />
   <bind nodeset="/data/mapquestion" type="select1"/>
   <bind nodeset="/data/location" type="geopoint" relevant="/data/mapquestion= 'No' " />
   <bind nodeset="/data/maplocation" type="geopoint" relevant="/data/mapquestion= 'Yes' "/>
-  <bind nodeset="/data/my_image"  type="binary"/>
+  <bind nodeset="/data/seastate" type="select1"/>
+  <bind nodeset="/data/weather" type="select1"/>
 
+  <bind nodeset="/data/EU" type="select1"/>
+  <bind nodeset="/data/EC" type="select1"/>
+  <bind nodeset="/data/ecototal" calculate="/data/EU + /data/EC" type="int"/>
+  <bind nodeset="/data/EcoConfirmation" type="string" required="true()" constraint=". != 'no'" jr:constraintMsg="Acknowledge before continuing."/>
  
-  <!--geolocation node-->
- <!--  <bind nodeset="/widgets/my_geopoint" type="geopoint"/> -->
+  <bind nodeset="/data/kayaktotal" type="select1"/>
+  <bind nodeset="/data/PK" type="select1"/>
+
+  <bind nodeset="/data/RP" type="select1"/>
+  <bind nodeset="/data/RPID" type="select"/>
+  <bind nodeset="/data/RPIDother" type="string"/>
+
+  <bind nodeset="/data/species" type="select"/>
+  <bind nodeset="/data/srkw" type="select1"/>
+  <bind nodeset="/data/pod" type="string" relevant="/data/srkw = 'yes'" />
+  <bind nodeset="/data/identity" type="string" />
+
+  <bind nodeset="/data/cohesion" type="string" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/srdir" type="select1" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/orientation" type="string" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/resspeed" type="string" relevant="/data/srkw = 'yes' " />
+
+  <bind nodeset="/data/my_image"  type="binary"/>
+  <bind nodeset="/data/comment" type="string" />
+  
   </model>
 </h:head>
 
@@ -75,363 +99,742 @@ xmlns:jr="http://openrosa.org/javarosa">
 <h:body>      
   <!--geolocation widget from ODK form design examples-->
   <!--automatically stops when accuracy is 5m or less unless specified under accuracy threshold-->
- 
- 
-<input ref="/data/dateTime" appearance="no-calendar">
-  <label>Verify that today's date and time are correct.</label>
-  <hint>Swipe right when the date and time are confirmed</hint>
-</input>
-<select1 ref="/data/mapquestion">
-  <label>Do you want to set location with a map and GPS?</label>
-  <hint>This feature uses data</hint>
-  <item>
-    <label>Yes, open map</label>
-    <value>Yes</value>
-  </item>
-  <item>
-    <label>No, use only GPS</label>
-    <value>No</value>
-  </item>
-</select1>
-<input ref="location">
-  <label>Select Record Location to obtain coordinates</label>
-  <hint>Once accuracy is 5 meters or less, location will be recorded. You can Replace the location</hint>
-</input>
-<input ref="/data/maplocation" appearance="placement-map">
-  <label>Indicate your current location on the map.</label>
-  <hint>Note: this uses Data and requires a connection</hint>
-</input>
-<select1 appearance="quick" ref="seastate">
-  <label>What is the sea state?</label>
-  <hint>On a Beaufort scale</hint>
+ <group>
+    <label>Surveyor Information</label>
+        <input ref="/data/name">
+            <label>Enter your name</label>
+        </input>
+        <select1 appearance="quick" ref="/data/AB">
+            <label>Is this an A or B count?</label>
+            <hint>Are there more than one 'scenes' you want to document?</hint>
+            <item>
+              <label>A</label>
+              <value>A</value>
+            </item>
+            <item>
+              <label>B</label>
+              <value>B</value>
+            </item>
+        </select1>
+        <input ref="/data/dateTime" appearance="no-calendar">
+          <label>Verify that today's date and time are correct.</label>
+          <hint>Swipe right when the date and time are confirmed</hint>
+        </input>
+</group>
 
-  <item>
-    <label>0, Sea like a mirror</label>
-    <value>0</value>
-  </item>
-  <item>
-    <label>1, Ripples</label>
-    <value>1</value>
-  </item>
-  <item>
-    <label>2, Small Wavelets all over. No Whitecaps</label>
-    <value>2</value>
-  </item>
-  <item>
-    <label>3, Large wavelets. Few white caps here and there</label>
-    <value>3</value>
-  </item>
-  <item>
-    <label>4, Small waves. Fairly frequent white caps</label>
-    <value>4</value>
-  </item>
-  <item>
-    <label>5, Moderate waves</label>
-    <value>5</value>
-  </item>
-  <item>
-    <label>6, Large waves with white foam crests. Spray probable</label>
-    <value>6</value>
-  </item>
-</select1>
+<group>
+    <label>Location Information</label>
+        <select1 appearance="quick" ref="/data/mapquestion">
+          <label>Do you want to set location with a map and GPS?</label>
+          <hint>This feature uses data</hint>
+          <item>
+            <label>Yes, open map</label>
+            <value>Yes</value>
+          </item>
+          <item>
+            <label>No, use only GPS</label>
+            <value>No</value>
+          </item>
+        </select1>
+        <input ref="location">
+          <label>Select Record Location to obtain coordinates</label>
+          <hint>Once accuracy is 5 meters or less, location will be recorded. You can Replace the location</hint>
+        </input>
+        <input ref="/data/maplocation" appearance="placement-map">
+          <label>Indicate your current location on the map.</label>
+          <hint>Note: this uses Data and requires a connection</hint>
+        </input>
+        <select1 appearance="quick" ref="seastate">
+          <label>What is the sea state?</label>
+          <hint>On a Beaufort scale</hint>
 
-<select1 appearance="quick" ref="weather">
-  <label>What is the weather?</label>
-  <hint>Cloudy? Sunny? Partly cloudy?</hint>
+          <item>
+            <label>0, Sea like a mirror</label>
+            <value>0</value>
+          </item>
+          <item>
+            <label>1, Ripples</label>
+            <value>1</value>
+          </item>
+          <item>
+            <label>2, Small Wavelets all over. No Whitecaps</label>
+            <value>2</value>
+          </item>
+          <item>
+            <label>3, Large wavelets. Few white caps here and there</label>
+            <value>3</value>
+          </item>
+          <item>
+            <label>4, Small waves. Fairly frequent white caps</label>
+            <value>4</value>
+          </item>
+          <item>
+            <label>5, Moderate waves</label>
+            <value>5</value>
+          </item>
+          <item>
+            <label>6, Large waves with white foam crests. Spray probable</label>
+            <value>6</value>
+          </item>
+        </select1>
 
-  <item>
-    <label>Sunny</label>
-    <value>sunny</value>
-  </item>
-  <item>
-    <label>Partly Sunny</label>
-    <value>partsun</value>
-  </item>
-  <item>
-    <label>Cloudy</label>
-    <value>cloudy</value>
-  </item>
-  <item>
-    <label>Partly Cloudy</label>
-    <value>partcloud</value>
-  </item>
-  <item>
-    <label>Raining</label>
-    <value>raining</value>
-  </item>
-  <item>
-    <label>Foggy</label>
-    <value>foggy</value>
-  </item>
-  <item>
-    <label>Windy</label>
-    <value>windy</value>
-  </item>
-  <item>
-    <label>Snowing</label>
-    <value>snowing</value>
-  </item>
-  <item>
-    <label>Hailing</label>
-    <value>hail</value>
-  </item>
-</select1>
+        <select1 appearance="quick" ref="weather">
+          <label>What is the weather?</label>
+          <hint>Cloudy? Sunny? Partly cloudy?</hint>
 
-<select1 appearance="minimal" ref="ecototal">
-  <label>Total number of ecotourism vessels</label>
-  <item>
-      <label>0</label>
-      <value>0</value>
-    </item>
-    <item>
-      <label>1</label>
-      <value>1</value>
-    </item>
-    <item>
-      <label>2</label>
-      <value>2</value>
-    </item>
-    <item>
-      <label>3</label>
-      <value>3</value>
-    </item>
-    <item>
-      <label>4</label>
-      <value>4</value>
-    </item>
-    <item>
-      <label>5</label>
-      <value>5</value>
-    </item>
-    <item>
-      <label>6</label>
-      <value>6</value>
-    </item>
-    <item>
-      <label>7</label>
-      <value>7</value>
-    </item>
-    <item>
-      <label>8</label>
-      <value>8</value>
-    </item>
-    <item>
-      <label>9</label>
-      <value>9</value>
-    </item>
-    <item>
-      <label>10</label>
-      <value>10</value>
-    </item>
-    <item>
-      <label>11</label>
-      <value>11</value>
-    </item>
-    <item>
-      <label>12</label>
-      <value>12</value>
-    </item>
-    <item>
-      <label>13</label>
-      <value>13</value>
-    </item>
-    <item>
-      <label>14</label>
-      <value>14</value>
-    </item>
-    <item>
-      <label>15</label>
-      <value>15</value>
-    </item>
-    <item>
-      <label>16</label>
-      <value>16</value>
-    </item>
-    <item>
-      <label>17</label>
-      <value>17</value>
-    </item>
-    <item>
-      <label>18</label>
-      <value>18</value>
-    </item>
-    <item>
-      <label>19</label>
-      <value>19</value>
-    </item>
-    <item>
-      <label>20</label>
-      <value>20</value>
-    </item>
-</select1>
-<select1 appearance="quick" ref="srkw">
-  <label>Are there Southern Residents Present?</label>
-  <item>
-    <label>Yes</label>
-    <value>yes</value>
-  </item>
-  <item>
-    <label>No</label>
-    <value>no</value>
-  </item>
-</select1>
-<select ref="species">
-  <label>What other marine mammal species are present?</label>
-  <hint>Select all that are present</hint>
-    <item>
-      <label>Transient Killer Whale</label>
-      <value>transient</value>
-    </item>
-    <item>
-      <label>Humpback Whale</label>
-      <value>humpback</value>
-    </item>
-    <item>
-      <label>Minke Whale</label>
-      <value>minke</value>
-    </item>
-    <item>
-      <label>Harbor Porpoise</label>
-      <value>harbporp</value>
-    </item>
-    <item>
-      <label>Dahl's Porpoise</label>
-      <value>dahls</value>
-    </item>
-    <item>
-      <label>Stellar Sea Lion</label>
-      <value>stellarlion</value>
-    </item>
-    <item>
-      <label>Harbor Seal</label>
-      <value>harseal</value>
-    </item>
-</select>
+          <item>
+            <label>Sunny</label>
+            <value>sunny</value>
+          </item>
+          <item>
+            <label>Partly Sunny</label>
+            <value>partsun</value>
+          </item>
+          <item>
+            <label>Cloudy</label>
+            <value>cloudy</value>
+          </item>
+          <item>
+            <label>Partly Cloudy</label>
+            <value>partcloud</value>
+          </item>
+          <item>
+            <label>Raining</label>
+            <value>raining</value>
+          </item>
+          <item>
+            <label>Foggy</label>
+            <value>foggy</value>
+          </item>
+          <item>
+            <label>Windy</label>
+            <value>windy</value>
+          </item>
+          <item>
+            <label>Snowing</label>
+            <value>snowing</value>
+          </item>
+          <item>
+            <label>Hailing</label>
+            <value>hail</value>
+          </item>
+        </select1>
+</group>
 
-<select ref="pod">
-  <label>What pods?</label>
-  <hint>Check all that are present</hint>
-  <item>
-    <label>J pod</label>
-    <value>j</value>
-  </item>
-  <item>
-    <label>K pod</label>
-    <value>k</value>
-  </item>
-  <item>
-    <label>L pod</label>
-    <value>l</value>
-  </item>
-</select>
+<group>
+    <label>Vessel Information</label>
+        <group appearance="field-list">
+            <select1 appearance="minimal" ref="EU">
+              <label>UNITED STATES Ecotourism vessels</label>
+              <item>
+                  <label>0</label>
+                  <value>0</value>
+                </item>
+                <item>
+                  <label>1</label>
+                  <value>1</value>
+                </item>
+                <item>
+                  <label>2</label>
+                  <value>2</value>
+                </item>
+                <item>
+                  <label>3</label>
+                  <value>3</value>
+                </item>
+                <item>
+                  <label>4</label>
+                  <value>4</value>
+                </item>
+                <item>
+                  <label>5</label>
+                  <value>5</value>
+                </item>
+                <item>
+                  <label>6</label>
+                  <value>6</value>
+                </item>
+                <item>
+                  <label>7</label>
+                  <value>7</value>
+                </item>
+                <item>
+                  <label>8</label>
+                  <value>8</value>
+                </item>
+                <item>
+                  <label>9</label>
+                  <value>9</value>
+                </item>
+                <item>
+                  <label>10</label>
+                  <value>10</value>
+                </item>
+                <item>
+                  <label>11</label>
+                  <value>11</value>
+                </item>
+                <item>
+                  <label>12</label>
+                  <value>12</value>
+                </item>
+                <item>
+                  <label>13</label>
+                  <value>13</value>
+                </item>
+                <item>
+                  <label>14</label>
+                  <value>14</value>
+                </item>
+                <item>
+                  <label>15</label>
+                  <value>15</value>
+                </item>
+                <item>
+                  <label>16</label>
+                  <value>16</value>
+                </item>
+                <item>
+                  <label>17</label>
+                  <value>17</value>
+                </item>
+                <item>
+                  <label>18</label>
+                  <value>18</value>
+                </item>
+                <item>
+                  <label>19</label>
+                  <value>19</value>
+                </item>
+                <item>
+                  <label>20</label>
+                  <value>20</value>
+                </item>
+            </select1>
+            <select1 appearance="minimal" ref="EC">
+              <label>CANADIAN Ecotourism vessels</label>
+              <item>
+                  <label>0</label>
+                  <value>0</value>
+                </item>
+                <item>
+                  <label>1</label>
+                  <value>1</value>
+                </item>
+                <item>
+                  <label>2</label>
+                  <value>2</value>
+                </item>
+                <item>
+                  <label>3</label>
+                  <value>3</value>
+                </item>
+                <item>
+                  <label>4</label>
+                  <value>4</value>
+                </item>
+                <item>
+                  <label>5</label>
+                  <value>5</value>
+                </item>
+                <item>
+                  <label>6</label>
+                  <value>6</value>
+                </item>
+                <item>
+                  <label>7</label>
+                  <value>7</value>
+                </item>
+                <item>
+                  <label>8</label>
+                  <value>8</value>
+                </item>
+                <item>
+                  <label>9</label>
+                  <value>9</value>
+                </item>
+                <item>
+                  <label>10</label>
+                  <value>10</value>
+                </item>
+                <item>
+                  <label>11</label>
+                  <value>11</value>
+                </item>
+                <item>
+                  <label>12</label>
+                  <value>12</value>
+                </item>
+                <item>
+                  <label>13</label>
+                  <value>13</value>
+                </item>
+                <item>
+                  <label>14</label>
+                  <value>14</value>
+                </item>
+                <item>
+                  <label>15</label>
+                  <value>15</value>
+                </item>
+                <item>
+                  <label>16</label>
+                  <value>16</value>
+                </item>
+                <item>
+                  <label>17</label>
+                  <value>17</value>
+                </item>
+                <item>
+                  <label>18</label>
+                  <value>18</value>
+                </item>
+                <item>
+                  <label>19</label>
+                  <value>19</value>
+                </item>
+                <item>
+                  <label>20</label>
+                  <value>20</value>
+                </item>
+            </select1>
+        </group>
+        <trigger ref="/data/EcoConfirmation">
+          <label>Acknowledge that there are '<output value="/data/EU"/>'US and '<output value="/data/EU"/>' CANADIAN, and '<output value="/data/ecototal"/>' Ecotourism vessels</label>
+        </trigger>
+        <group appearance="field-list">
+          <select1 appearance="minimal" ref="kayaktotal">
+            <label>How many kayaks are present?</label>
+            <item>
+              <label>0</label>
+              <value>0</value>
+            </item>
+            <item>
+              <label>1</label>
+              <value>1</value>
+            </item>
+            <item>
+              <label>2</label>
+              <value>2</value>
+            </item>
+            <item>
+              <label>3</label>
+              <value>3</value>
+            </item>
+            <item>
+              <label>4</label>
+              <value>4</value>
+            </item>
+            <item>
+              <label>5</label>
+              <value>5</value>
+            </item>
+            <item>
+              <label>6</label>
+              <value>6</value>
+            </item>
+            <item>
+              <label>7</label>
+              <value>7</value>
+            </item>
+            <item>
+              <label>8</label>
+              <value>8</value>
+            </item>
+            <item>
+              <label>9</label>
+              <value>9</value>
+            </item>
+            <item>
+              <label>10</label>
+              <value>10</value>
+            </item>
+            <item>
+              <label>11</label>
+              <value>11</value>
+            </item>
+            <item>
+              <label>12</label>
+              <value>12</value>
+            </item>
+            <item>
+              <label>13</label>
+              <value>13</value>
+            </item>
+            <item>
+              <label>14</label>
+              <value>14</value>
+            </item>
+            <item>
+              <label>15</label>
+              <value>15</value>
+            </item>
+            <item>
+              <label>16</label>
+              <value>16</value>
+            </item>
+            <item>
+              <label>17</label>
+              <value>17</value>
+            </item>
+            <item>
+              <label>18</label>
+              <value>18</value>
+            </item>
+            <item>
+              <label>19</label>
+              <value>19</value>
+            </item>
+            <item>
+              <label>20</label>
+              <value>20</value>
+            </item>
+          </select1>
+          <select1 appearance="minimal" ref="PK">
+            <label>How many kayaks are privately owned and operated?</label>
+            <item>
+              <label>0</label>
+              <value>0</value>
+            </item>
+            <item>
+              <label>1</label>
+              <value>1</value>
+            </item>
+            <item>
+              <label>2</label>
+              <value>2</value>
+            </item>
+            <item>
+              <label>3</label>
+              <value>3</value>
+            </item>
+            <item>
+              <label>4</label>
+              <value>4</value>
+            </item>
+            <item>
+              <label>5</label>
+              <value>5</value>
+            </item>
+            <item>
+              <label>6</label>
+              <value>6</value>
+            </item>
+            <item>
+              <label>7</label>
+              <value>7</value>
+            </item>
+            <item>
+              <label>8</label>
+              <value>8</value>
+            </item>
+            <item>
+              <label>9</label>
+              <value>9</value>
+            </item>
+            <item>
+              <label>10</label>
+              <value>10</value>
+            </item>
+            <item>
+              <label>11</label>
+              <value>11</value>
+            </item>
+            <item>
+              <label>12</label>
+              <value>12</value>
+            </item>
+            <item>
+              <label>13</label>
+              <value>13</value>
+            </item>
+            <item>
+              <label>14</label>
+              <value>14</value>
+            </item>
+            <item>
+              <label>15</label>
+              <value>15</value>
+            </item>
+            <item>
+              <label>16</label>
+              <value>16</value>
+            </item>
+            <item>
+              <label>17</label>
+              <value>17</value>
+            </item>
+            <item>
+              <label>18</label>
+              <value>18</value>
+            </item>
+            <item>
+              <label>19</label>
+              <value>19</value>
+            </item>
+            <item>
+              <label>20</label>
+              <value>20</value>
+            </item>
+          </select1>
+        </group>
 
-<select1 appearance="quick" ref="cohesion">
-  <label>What is the cohesion of the whales?</label>
-  <hint>What is their spacing?</hint>
-  <item>
-      <label>Contact</label>
-        <hint>Whales are touching</hint>
-      <value>contact</value>
-  </item>
-  <item>
-      <label>Tight</label>
-        <hint>Whales are close together</hint>
-      <value>tight</value>
-  </item>
-  <item>
-      <label>Loose</label>
-        <hint>Whales are in a spread group</hint>
-      <value>loose</value>
-  </item>
-  <item>
-      <label>Spread</label>
-        <hint>Whales are spread out</hint>
-      <value>spread</value>
-  </item>
-  <item>
-      <label>Spread in Groups</label>
-        <hint>Whales are spread out in groups</hint>
-      <value>spreadgroup</value>
-  </item>
-</select1>
+        <group appearance="field-list">
+          <select1 appearance="minimal" ref="RP">
+            <label>How many RESEARCH vessels are present?</label>
+            <item>
+              <label>0</label>
+              <value>0</value>
+            </item>
+            <item>
+              <label>1</label>
+              <value>1</value>
+            </item>
+            <item>
+              <label>2</label>
+              <value>2</value>
+            </item>
+            <item>
+              <label>3</label>
+              <value>3</value>
+            </item>
+            <item>
+              <label>4</label>
+              <value>4</value>
+            </item>
+            <item>
+              <label>5</label>
+              <value>5</value>
+            </item>
+            <item>
+              <label>6</label>
+              <value>6</value>
+            </item>
+            <item>
+              <label>7</label>
+              <value>7</value>
+            </item>
+            <item>
+              <label>8</label>
+              <value>8</value>
+            </item>
+            <item>
+              <label>9</label>
+              <value>9</value>
+            </item>
+            <item>
+              <label>10</label>
+              <value>10</value>
+            </item>
+          </select1>
+          <select ref="RPID">
+              <label>Select the Research organizations present</label>
+                  <item>
+                    <label>UW- MOJA</label>
+                    <value>MOJA</value>
+                  </item>
+                  <item>
+                    <label>NOAA</label>
+                    <value>NOAA</value>
+                  </item>
+                  <item>
+                    <label>Center for Whale Research</label>
+                    <value>CRW</value>
+                  </item>
+                  <item>
+                    <label>WDFW</label>
+                    <value>WDFW</value>
+                  </item>
+                  <item>
+                    <label>Straitwatch</label>
+                    <value>Straitwatch</value>
+                  </item>
+          </select>
+          <input ref="RPIDother">
+            <label>Other</label>
+          </input>
+        </group>
+</group>
 
-<select1 ref="srdir">
-  <label>What direction are they going?</label>
+<group>
+    <label>Species</label>
+        <select ref="species">
+          <label>What other marine mammal species are present?</label>
+          <hint>Select all that are present</hint>
+            <item>
+              <label>Transient Killer Whale</label>
+              <value>transient</value>
+            </item>
+            <item>
+              <label>Humpback Whale</label>
+              <value>humpback</value>
+            </item>
+            <item>
+              <label>Minke Whale</label>
+              <value>minke</value>
+            </item>
+            <item>
+              <label>Harbor Porpoise</label>
+              <value>harbporp</value>
+            </item>
+            <item>
+              <label>Dahl's Porpoise</label>
+              <value>dahls</value>
+            </item>
+            <item>
+              <label>Stellar Sea Lion</label>
+              <value>stellarlion</value>
+            </item>
+            <item>
+              <label>Harbor Seal</label>
+              <value>harseal</value>
+            </item>
+        </select>
+        <select1 appearance="quick" ref="srkw">
+          <label>Are there Southern Residents Present?</label>
+          <item>
+            <label>Yes</label>
+            <value>yes</value>
+          </item>
+          <item>
+            <label>No</label>
+            <value>no</value>
+          </item>
+        </select1>
+        <group appearance="field-list">
+          <select ref="pod">
+            <label>What pods?</label>
+            <hint>Check all that are present</hint>
+            <item>
+              <label>J pod</label>
+              <value>j</value>
+            </item>
+            <item>
+              <label>K pod</label>
+              <value>k</value>
+            </item>
+            <item>
+              <label>L pod</label>
+              <value>l</value>
+            </item>
+          </select>
+          <input ref="identity">
+              <label>Enter the identities of individual SRKWs</label>
+          </input>
+        </group>
+</group>
 
- <item>
-      <label>North</label>
-      <value>north</value>
- </item>
- <item>
-      <label>Northeast</label>
-      <value>northeast</value>
-  </item>
-  <item>
-      <label>East</label>
-      <value>east</value>
-  </item>
-  <item>
-      <label>Southeast</label>
-      <value>southeast</value>
-  </item>
-  <item>
-      <label>South</label>
-      <value>South</value>
-  </item>
-  <item>
-      <label>Southwest</label>
-      <value>southwest</value>
-  </item>
-  <item>
-      <label>West</label>
-      <value>west</value>
-  </item>
-  <item>
-      <label>Northwest</label>
-      <value>northwest</value>
-  </item>
-</select1>
+<group>
+    <label>SRKW Information</label>
+        <select1 appearance="quick" ref="cohesion">
+          <label>What is the cohesion of the whales?</label>
+          <hint>What is their spacing?</hint>
+          <item>
+              <label>Contact</label>
+                <hint>Whales are touching</hint>
+              <value>contact</value>
+          </item>
+          <item>
+              <label>Tight</label>
+                <hint>Whales are close together</hint>
+              <value>tight</value>
+          </item>
+          <item>
+              <label>Loose</label>
+                <hint>Whales are in a spread group</hint>
+              <value>loose</value>
+          </item>
+          <item>
+              <label>Spread</label>
+                <hint>Whales are spread out</hint>
+              <value>spread</value>
+          </item>
+          <item>
+              <label>Spread in Groups</label>
+                <hint>Whales are spread out in groups</hint>
+              <value>spreadgroup</value>
+          </item>
+        </select1>
 
-<select1 appearance="quick" ref="orientation">
-  <label>What is the orientation of the Southern Residents?</label>
-  <item>
-    <label>Flank</label>
-    <value>flank</value>
-  </item>
-  <item>
-    <label>Linear</label>
-    <value>linear</value>
-  </item>
-  <item>
-    <label>Non-Linear</label>
-    <value>nonlinear</value>
-  </item>
-</select1>
+        <select1 appearance="quick" ref="srdir">
+          <label>What direction are they going?</label>
 
-<select1 appearance="quick" ref="resspeed">
-  <label>How fast are they going?</label>
-  <item>
-    <label>Stationary</label>
-    <value>stationary</value>
-  </item>
-  <item>
-    <label>Slow</label>
-    <value>slow</value>
-  </item>
-  <item>
-    <label>Medium</label>
-    <value>medium</value>
-  </item>
-  <item>
-    <label>Fast</label>
-    <value>fast</value>
-  </item>
-  <item>
-    <label>Porpoise</label>
-      <hint>spray off the fin, swimming fast</hint>
-    <value>porpoise</value>
-  </item>
-</select1>
+         <item>
+              <label>North</label>
+              <value>north</value>
+         </item>
+         <item>
+              <label>Northeast</label>
+              <value>northeast</value>
+          </item>
+          <item>
+              <label>East</label>
+              <value>east</value>
+          </item>
+          <item>
+              <label>Southeast</label>
+              <value>southeast</value>
+          </item>
+          <item>
+              <label>South</label>
+              <value>South</value>
+          </item>
+          <item>
+              <label>Southwest</label>
+              <value>southwest</value>
+          </item>
+          <item>
+              <label>West</label>
+              <value>west</value>
+          </item>
+          <item>
+              <label>Northwest</label>
+              <value>northwest</value>
+          </item>
+        </select1>
+
+        <select1 appearance="quick" ref="orientation">
+          <label>What is the orientation of the Southern Residents?</label>
+          <item>
+            <label>Flank</label>
+            <value>flank</value>
+          </item>
+          <item>
+            <label>Linear</label>
+            <value>linear</value>
+          </item>
+          <item>
+            <label>Non-Linear</label>
+            <value>nonlinear</value>
+          </item>
+        </select1>
+
+        <select1 appearance="quick" ref="resspeed">
+          <label>How fast are they going?</label>
+          <item>
+            <label>Stationary</label>
+            <value>stationary</value>
+          </item>
+          <item>
+            <label>Slow</label>
+            <value>slow</value>
+          </item>
+          <item>
+            <label>Medium</label>
+            <value>medium</value>
+          </item>
+          <item>
+            <label>Fast</label>
+            <value>fast</value>
+          </item>
+          <item>
+            <label>Porpoise</label>
+              <hint>spray off the fin, swimming fast</hint>
+            <value>porpoise</value>
+          </item>
+        </select1>
+</group>
+
 <upload ref="my_image" mediatype="image/*">
   <hint>This will launch the camera to take a picture</hint>
   <label>Take a picture!</label>
