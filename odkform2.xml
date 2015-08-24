@@ -5,17 +5,16 @@ xmlns:ev="http://www.w3.org/2001/xml-events"
 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 xmlns:jr="http://openrosa.org/javarosa">
 
-
 <!-- title will be shown to user -->
 <h:head>
-  <h:title>Killer Whale Collection</h:title>
+  <h:title>Soundwatch Form</h:title>
   <model>
    
-
   <!-- instance, where data are going to be stored -->
   <!-- can name it anything.... <data id=... or <junk id=..-->
+  <!-- data entered between tags will be default selection in app.-->
   <instance>
-    <data id="data1" >
+    <data id="data" version="2015082301">
 
       <start/>
       <end/>
@@ -28,29 +27,30 @@ xmlns:jr="http://openrosa.org/javarosa">
       <maplocation/>
       <seastate/>
       <weather/>
-      <EU/>
-      <EC/>
+      <EU>0</EU>
+      <EC>0</EC>
       <ecototal/>
       <EcoConfirmation/>
+      <EK>0</EK>
+      <PK>0</PK>
       <kayaktotal/>
-      <PK/>
+      <kayakConfirmation/>
       <RP/>
-      <RPID/>
+      <RPID>Soundwatch</RPID>
       <RPIDother/>
       <species/>
-      <srkw/>
       <pod/>
       <identity/>
       <cohesion/>
       <srdir/>
       <orientation/>
-      <resspeed/>       
+      <resspeed/>  
+      <behaviors/>     
       <my_image/>
       <comment/> 
     </data>
   </instance>
  
-
   <!-- bindings, constraints -->
   <!-- bindings not identified are default to string -->
   <!-- cascading skip logic. If SRKW present, ask what pod -->
@@ -61,7 +61,7 @@ xmlns:jr="http://openrosa.org/javarosa">
   <bind nodeset="/data/name" type="string" />
   <bind nodeset="/data/AB" type="select1"/>
   <bind nodeset="/data/dateTime" type="dateTime" />
-  <bind nodeset="/data/mapquestion" type="select1"/>
+  <bind nodeset="/data/mapquestion" type="select1" required="true()" constraint=". != 'no'" jr:constraintMsg="Acknowledge before continuing."/>
   <bind nodeset="/data/location" type="geopoint" relevant="/data/mapquestion= 'No' " />
   <bind nodeset="/data/maplocation" type="geopoint" relevant="/data/mapquestion= 'Yes' "/>
   <bind nodeset="/data/seastate" type="select1"/>
@@ -72,22 +72,24 @@ xmlns:jr="http://openrosa.org/javarosa">
   <bind nodeset="/data/ecototal" calculate="/data/EU + /data/EC" type="int"/>
   <bind nodeset="/data/EcoConfirmation" type="string" required="true()" constraint=". != 'no'" jr:constraintMsg="Acknowledge before continuing."/>
  
-  <bind nodeset="/data/kayaktotal" type="select1"/>
+  <bind nodeset="/data/EK" type="select1"/>
   <bind nodeset="/data/PK" type="select1"/>
+  <bind nodeset="/data/kayaktotal" calculate="/data/PK + /data/EK" type="int"/>
+  <bind nodeset="/data/kayakConfirmation" type="string" required="true()" constraint=". != 'no'" jr:constraintMsg="Acknowledge before continuing."/>
 
   <bind nodeset="/data/RP" type="select1"/>
   <bind nodeset="/data/RPID" type="select"/>
   <bind nodeset="/data/RPIDother" type="string"/>
 
-  <bind nodeset="/data/species" type="select"/>
-  <bind nodeset="/data/srkw" type="select1"/>
-  <bind nodeset="/data/pod" type="string" relevant="/data/srkw = 'yes'" />
-  <bind nodeset="/data/identity" type="string" />
+  <bind nodeset="/data/species" type="select" required="true()" constraint=". != 'no'" jr:constraintMsg="Acknowledge before continuing."/>
+  <bind nodeset="/data/pod" type="string" relevant="selected(/data/species, 'srkw' )" />
+  <bind nodeset="/data/identity" type="string" relevant="selected(/data/species, 'srkw' )" />
 
-  <bind nodeset="/data/cohesion" type="string" relevant="/data/srkw = 'yes' " />
-  <bind nodeset="/data/srdir" type="select1" relevant="/data/srkw = 'yes' " />
-  <bind nodeset="/data/orientation" type="string" relevant="/data/srkw = 'yes' " />
-  <bind nodeset="/data/resspeed" type="string" relevant="/data/srkw = 'yes' " />
+  <bind nodeset="/data/cohesion" type="string" relevant="selected(/data/species, 'srkw' )" />
+  <bind nodeset="/data/srdir" type="select1" relevant="selected(/data/species, 'srkw' )" />
+  <bind nodeset="/data/orientation" type="string" relevant="selected(/data/species, 'srkw' )" />
+  <bind nodeset="/data/resspeed" type="string" relevant="selected(/data/species, 'srkw' )" />
+  <bind nodeset="/data/behavior" type="select" relevant="selected(/data/species, 'srkw' )" />
 
   <bind nodeset="/data/my_image"  type="binary"/>
   <bind nodeset="/data/comment" type="string" />
@@ -103,10 +105,11 @@ xmlns:jr="http://openrosa.org/javarosa">
     <label>Surveyor Information</label>
         <input ref="/data/name">
             <label>Enter your name</label>
+            <hint>Swipe to the LEFT when you've entered your name</hint>
         </input>
         <select1 appearance="quick" ref="/data/AB">
             <label>Is this an A or B count?</label>
-            <hint>Are there more than one 'scenes' you want to document?</hint>
+            <hint>Is this the first or second scan for the hour?</hint>
             <item>
               <label>A</label>
               <value>A</value>
@@ -118,17 +121,17 @@ xmlns:jr="http://openrosa.org/javarosa">
         </select1>
         <input ref="/data/dateTime" appearance="no-calendar">
           <label>Verify that today's date and time are correct.</label>
-          <hint>Swipe right when the date and time are confirmed</hint>
+          <hint>Swipe LEFT when the date and time are confirmed</hint>
         </input>
 </group>
 
 <group>
     <label>Location Information</label>
         <select1 appearance="quick" ref="/data/mapquestion">
-          <label>Do you want to set location with a map and GPS?</label>
-          <hint>This feature uses data</hint>
+          <label>Do you want to set location with a MAP and GPS?</label>
+          <hint>The MAP feature uses data</hint>
           <item>
-            <label>Yes, open map</label>
+            <label>Yes, use map. I want to use data.</label>
             <value>Yes</value>
           </item>
           <item>
@@ -180,7 +183,7 @@ xmlns:jr="http://openrosa.org/javarosa">
 
         <select1 appearance="quick" ref="weather">
           <label>What is the weather?</label>
-          <hint>Cloudy? Sunny? Partly cloudy?</hint>
+          <hint>Look at the sky!</hint>
 
           <item>
             <label>Sunny</label>
@@ -225,7 +228,8 @@ xmlns:jr="http://openrosa.org/javarosa">
     <label>Vessel Information</label>
         <group appearance="field-list">
             <select1 appearance="minimal" ref="EU">
-              <label>UNITED STATES Ecotourism vessels</label>
+              <label>Enter number of UNITED STATES Ecotourism vessels</label>
+              <hint>select the number from the dropdown</hint>
               <item>
                   <label>0</label>
                   <value>0</value>
@@ -313,6 +317,7 @@ xmlns:jr="http://openrosa.org/javarosa">
             </select1>
             <select1 appearance="minimal" ref="EC">
               <label>CANADIAN Ecotourism vessels</label>
+              <hint>select the number from the dropdown</hint>
               <item>
                   <label>0</label>
                   <value>0</value>
@@ -400,11 +405,13 @@ xmlns:jr="http://openrosa.org/javarosa">
             </select1>
         </group>
         <trigger ref="/data/EcoConfirmation">
-          <label>Acknowledge that there are '<output value="/data/EU"/>'US and '<output value="/data/EU"/>' CANADIAN, and '<output value="/data/ecototal"/>' Ecotourism vessels</label>
+          <label>Confirm that there are '<output value="/data/EU"/>' US and '<output value="/data/EC"/>' CANADIAN, and '<output value="/data/ecototal"/>' TOTAL Ecotourism vessels</label>
         </trigger>
+
         <group appearance="field-list">
-          <select1 appearance="minimal" ref="kayaktotal">
-            <label>How many kayaks are present?</label>
+          <select1 appearance="minimal" ref="EK">
+            <label>Enter number of ECOTOURISM kayaks</label>
+            <hint>select the number from the dropdown</hint>
             <item>
               <label>0</label>
               <value>0</value>
@@ -491,7 +498,8 @@ xmlns:jr="http://openrosa.org/javarosa">
             </item>
           </select1>
           <select1 appearance="minimal" ref="PK">
-            <label>How many kayaks are privately owned and operated?</label>
+            <label>Enter number of PRIVATE kayaks</label>
+            <hint>select the number from the dropdown</hint>
             <item>
               <label>0</label>
               <value>0</value>
@@ -578,6 +586,9 @@ xmlns:jr="http://openrosa.org/javarosa">
             </item>
           </select1>
         </group>
+        <trigger appearance="quick" ref="/data/kayakConfirmation">
+          <label>Confirm that there are '<output value="/data/EK"/>' ECOTOURISM and '<output value="/data/PK"/>' PRIVATE, and '<output value="/data/kayaktotal"/>' TOTAL kayaks</label>
+        </trigger>
 
         <group appearance="field-list">
           <select1 appearance="minimal" ref="RP">
@@ -630,6 +641,10 @@ xmlns:jr="http://openrosa.org/javarosa">
           <select ref="RPID">
               <label>Select the Research organizations present</label>
                   <item>
+                    <label>Soundwatch</label>
+                    <value>Soundwatch</value>
+                  </item>
+                  <item>
                     <label>UW- MOJA</label>
                     <value>MOJA</value>
                   </item>
@@ -662,6 +677,10 @@ xmlns:jr="http://openrosa.org/javarosa">
           <label>What other marine mammal species are present?</label>
           <hint>Select all that are present</hint>
             <item>
+              <label>Southern Resident Killer Whale</label>
+              <value>srkw</value>
+            </item>
+            <item>
               <label>Transient Killer Whale</label>
               <value>transient</value>
             </item>
@@ -690,18 +709,15 @@ xmlns:jr="http://openrosa.org/javarosa">
               <value>harseal</value>
             </item>
         </select>
-        <select1 appearance="quick" ref="srkw">
-          <label>Are there Southern Residents Present?</label>
-          <item>
-            <label>Yes</label>
-            <value>yes</value>
-          </item>
-          <item>
-            <label>No</label>
-            <value>no</value>
-          </item>
-        </select1>
-        <group appearance="field-list">
+       
+         
+       
+</group>
+
+<group>
+     <label>Southern Resident Information</label>
+      <group appearance="field-list">
+          
           <select ref="pod">
             <label>What pods?</label>
             <hint>Check all that are present</hint>
@@ -722,10 +738,7 @@ xmlns:jr="http://openrosa.org/javarosa">
               <label>Enter the identities of individual SRKWs</label>
           </input>
         </group>
-</group>
 
-<group>
-    <label>SRKW Information</label>
         <select1 appearance="quick" ref="cohesion">
           <label>What is the cohesion of the whales?</label>
           <hint>What is their spacing?</hint>
@@ -833,6 +846,30 @@ xmlns:jr="http://openrosa.org/javarosa">
             <value>porpoise</value>
           </item>
         </select1>
+
+        <select appearance="quick" ref="behaviors">
+          <label>Select Surface behaviors observed</label>
+          <item>
+            <label>Spyhop</label>
+            <value>spyhop</value>
+          </item>
+          <item>
+            <label>Breach</label>
+            <value>breach</value>
+          </item>
+          <item>
+            <label>Bellyflop</label>
+            <value>bellyflop</value>
+          </item>
+          <item>
+            <label>Cartwheel</label>
+            <value>cartwheel</value>
+          </item>
+          <item>
+            <label>Other</label>
+            <value>other</value>
+          </item>
+        </select>
 </group>
 
 <upload ref="my_image" mediatype="image/*">
@@ -841,6 +878,7 @@ xmlns:jr="http://openrosa.org/javarosa">
 </upload>
 <input ref="comment">
   <label>Any other comments or behaviors?</label>
+  <hint>Swipe LEFT when done</hint>
 </input>
 
 </h:body>
